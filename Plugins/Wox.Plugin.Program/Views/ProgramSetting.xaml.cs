@@ -1,10 +1,17 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using Wox.Plugin.Program.Views.Models;
+using Wox.Plugin.Program.Views.Commands;
 using Wox.Plugin.Program.Programs;
+using System.ComponentModel;
+using System.Windows.Data;
 
-namespace Wox.Plugin.Program
+namespace Wox.Plugin.Program.Views
 {
     /// <summary>
     /// Interaction logic for ProgramSetting.xaml
@@ -13,8 +20,12 @@ namespace Wox.Plugin.Program
     {
         private PluginInitContext context;
         private Settings _settings;
+        private GridViewColumnHeader _lastHeaderClicked;
+        private ListSortDirection _lastDirection;
 
-        public ProgramSetting(PluginInitContext context, Settings settings)
+        internal static List<ProgramSource> ProgramSettingDisplayList { get; set; }
+
+        public ProgramSetting(PluginInitContext context, Settings settings, Win32[] win32s, UWP.Application[] uwps)
         {
             this.context = context;
             InitializeComponent();
@@ -24,7 +35,9 @@ namespace Wox.Plugin.Program
 
         private void Setting_Loaded(object sender, RoutedEventArgs e)
         {
-            programSourceView.ItemsSource = _settings.ProgramSources;
+            ProgramSettingDisplayList = _settings.ProgramSources.LoadProgramSources();
+            programSourceView.ItemsSource = ProgramSettingDisplayList;
+
             StartMenuEnabled.IsChecked = _settings.EnableStartMenuSource;
             RegistryEnabled.IsChecked = _settings.EnableRegistrySource;
         }
@@ -47,6 +60,8 @@ namespace Wox.Plugin.Program
             {
                 ReIndexing();
             }
+
+            programSourceView.Items.Refresh();
         }
 
         private void btnDeleteProgramSource_OnClick(object sender, RoutedEventArgs e)
@@ -141,6 +156,79 @@ namespace Wox.Plugin.Program
         {
             _settings.EnableRegistrySource = RegistryEnabled.IsChecked ?? false;
             ReIndexing();
+        }
+
+        private void btnLoadAllProgramSource_OnClick(object sender, RoutedEventArgs e)
+        {
+            ProgramSettingDisplayList.LoadAllApplications();
+
+            programSourceView.Items.Refresh();
+        }
+
+        private void btnDisableProgramSource_OnClick(object sender, RoutedEventArgs e)
+        {
+            ProgramSettingDisplayList
+                .DisableProgramSources(programSourceView
+                                        .SelectedItems.Cast<ProgramSource>()
+                                        .ToList());
+
+            ProgramSettingDisplayList.StoreDisabledInSettings();
+
+            programSourceView.SelectedItems.Clear();
+
+            programSourceView.Items.Refresh();            
+        }
+
+        private void ProgramSourceView_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            programSourceView.SelectedItems.Clear();
+        }
+
+        private void GridViewColumnHeaderClickedHandler(object sender, RoutedEventArgs e)
+        {
+            var headerClicked = e.OriginalSource as GridViewColumnHeader;
+            ListSortDirection direction;
+
+            if (headerClicked != null)
+            {
+                if (headerClicked.Role != GridViewColumnHeaderRole.Padding)
+                {
+                    if (headerClicked != _lastHeaderClicked)
+                    {
+                        direction = ListSortDirection.Ascending;
+                    }
+                    else
+                    {
+                        if (_lastDirection == ListSortDirection.Ascending)
+                        {
+                            direction = ListSortDirection.Descending;
+                        }
+                        else
+                        {
+                            direction = ListSortDirection.Ascending;
+                        }
+                    }
+
+                    var columnBinding = headerClicked.Column.DisplayMemberBinding as Binding;
+                    var sortBy = columnBinding?.Path.Path ?? headerClicked.Column.Header as string;
+
+                    Sort(sortBy, direction);
+                    
+                    _lastHeaderClicked = headerClicked;
+                    _lastDirection = direction;
+                }
+            }
+        }
+
+        private void Sort(string sortBy, ListSortDirection direction)
+        {
+            ICollectionView dataView =
+              CollectionViewSource.GetDefaultView(programSourceView.ItemsSource);
+
+            dataView.SortDescriptions.Clear();
+            SortDescription sd = new SortDescription(sortBy, direction);
+            dataView.SortDescriptions.Add(sd);
+            dataView.Refresh();
         }
     }
 }
