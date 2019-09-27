@@ -10,6 +10,27 @@ namespace Wox.Test
     [TestFixture]
     public class FuzzyMatcherTest
     {
+        public List<string> GetSearchStrings() 
+            => new List<string>
+            {
+                "Chrome",
+                "Choose which programs you want Windows to use for activities like web browsing, editing photos, sending e-mail, and playing music.",
+                "Help cure hope raise on mind entity Chrome ",
+                "Candy Crush Saga from King",
+                "Uninstall or change programs on your computer",
+                "Add, change, and manage fonts on your computer",
+                "Last is chrome",
+                "1111"
+            };
+
+        public List<int> GetPrecisionScores()
+            => new List<int>
+            {
+                0, //no precision
+                20, //low
+                50 //regular
+            };
+
         [Test]
         public void MatchTest()
         {
@@ -41,23 +62,22 @@ namespace Wox.Test
             Assert.IsTrue(results[2].Title == "file open in browser-test");
         }
 
-        [TestCase("c", 50)]
-        [TestCase("ch", 50)]
-        [TestCase("chr", 50)]
-        [TestCase("chrom", 50)]
-        public void FuzzyMatchSensitivityTest(string searchTerm, int searchSensitivity)
-        {
-            var sources = new List<string>
-            {
-                "Chrome",
-                "Choose which programs you want Windows to use for activities like web browsing, editing photos, sending e-mail, and playing music.",
-                "Candy Crush Saga from King",
-                "Uninstall or change programs on your computer",
-                "Add, change, and manage fonts on your computer"
-            };
 
+
+        //[TestCase("c", 50)]
+        //[TestCase("ch", 50)]
+        //[TestCase("chr", 50)]
+        [TestCase("chrom")]
+        [TestCase("chrome")]
+        //[TestCase("chrom", 0)]
+        //[TestCase("cand", 50)]
+        //[TestCase("cpywa", 0)]
+        [TestCase("ccs")]
+        public void WhenGivenStringsAndAppliedPrecisionFilteringThenShouldReturnGreaterThanPrecisionScoreResults(string searchTerm)
+        {
             var results = new List<Result>();
-            foreach (var str in sources)
+            
+            foreach (var str in GetSearchStrings())
             {
                 results.Add(new Result
                 {
@@ -66,29 +86,23 @@ namespace Wox.Test
                 });
             }
 
-            results = results.Where(x => x.Score > searchSensitivity).OrderByDescending(x => x.Score).ToList();
+            foreach(var precisionScore in GetPrecisionScores())
+            {
+                var filteredResult = results.Where(result => result.Score >= precisionScore).Select(result => result).OrderByDescending(x => x.Score).ToList();
 
-            Debug.WriteLine("");
-            Debug.WriteLine("###############################################");
+                Debug.WriteLine("");
+                Debug.WriteLine("###############################################");
+                Debug.WriteLine("SEARCHTERM: " + searchTerm + ", GreaterThanSearchPrecisionScore: " + precisionScore);
+                foreach (var item in filteredResult)
+                {
+                    Debug.WriteLine("SCORE: " + item.Score.ToString() + ", FoundString: " + item.Title);
+                }
+                Debug.WriteLine("###############################################");
+                Debug.WriteLine("");
 
-            Debug.WriteLine("SEARCHTERM: " + searchTerm + ", GreaterThanSearchSensitivityScore: " + searchSensitivity);
-            foreach (var item in results)
-                Debug.WriteLine("SCORE: " + item.Score.ToString() + ", SearchString: " + item.Title);
-
-            Debug.WriteLine("###############################################");
-            Debug.WriteLine("");
-
-
-
-            //Assert.IsTrue(results.Count == 5);
-
-
-
-            //Assert.IsTrue(results[0].Title == sources[1]);
-
-            //Assert.IsTrue(results[0].Title == sources[0]);
-            //Assert.IsFalse(results[1].Title == sources[1]);
-            //Assert.IsTrue(results.Count == 3);
+                Assert.IsFalse(filteredResult.Any(x => x.Score < precisionScore));
+                Assert.IsFalse(filteredResult.Any(x => x.Score == 0));
+            }
         }
     }
 }
