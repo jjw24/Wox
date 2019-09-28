@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
@@ -111,6 +111,50 @@ namespace Wox.Test
 
                 Assert.IsFalse(filteredResult.Any(x => x.Score < precisionScore));
             }
+        }
+
+        [TestCase("chrome")]
+        public void WhenGivenStringsForCalScoreMethodThenShouldAlwaysReturnSpecificScore(string searchTerm)
+        {
+            var searchStrings = new List<string>
+            {
+                "Chrome",//SCORE: 107
+                "Last is chrome",//SCORE: 53
+                "Help cure hope raise on mind entity Chrome",//SCORE: 21
+                "Uninstall or change programs on your computer", //SCORE: 15
+                "Candy Crush Saga from King"//SCORE: 0
+            }
+            .OrderByDescending(x => x)
+            .ToList();
+
+            var results = new List<Result>();
+
+            foreach (var str in searchStrings)
+            {
+                results.Add(new Result
+                {
+                    Title = str,
+                    Score = FuzzyMatcher.Create(searchTerm).Evaluate(str).Score
+                });
+            }
+
+            var orderedResults = results.OrderByDescending(x => x.Title).ToList();
+
+            Debug.WriteLine("");
+            Debug.WriteLine("###############################################");
+            Debug.WriteLine("SEARCHTERM: " + searchTerm);
+            foreach (var item in orderedResults)
+            {
+                Debug.WriteLine("SCORE: " + item.Score.ToString() + ", FoundString: " + item.Title);
+            }
+            Debug.WriteLine("###############################################");
+            Debug.WriteLine("");
+                       
+            Assert.IsTrue(orderedResults[0].Score == 15 && orderedResults[0].Title == searchStrings[0]);
+            Assert.IsTrue(orderedResults[1].Score == 53 && orderedResults[1].Title == searchStrings[1]);
+            Assert.IsTrue(orderedResults[2].Score == 21 && orderedResults[2].Title == searchStrings[2]);
+            Assert.IsTrue(orderedResults[3].Score == 107 && orderedResults[3].Title == searchStrings[3]);
+            Assert.IsTrue(orderedResults[4].Score == 0 && orderedResults[4].Title == searchStrings[4]);
         }
     }
 }
