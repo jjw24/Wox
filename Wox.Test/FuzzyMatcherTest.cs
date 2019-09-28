@@ -62,6 +62,15 @@ namespace Wox.Test
             Assert.IsTrue(results[2].Title == "file open in browser-test");
         }
 
+        [TestCase("Chrome")]
+        public void WhenGivenNotAllCharactersFoundInSearchStringThenShouldReturnZeroScore(string searchString)
+        {
+            var compareString = "Can have rum only in my glass";
+
+            var scoreResult = FuzzyMatcher.Create(compareString).Evaluate(searchString).Score;
+
+            Assert.True(scoreResult == 0);
+        }
 
 
         //[TestCase("c", 50)]
@@ -101,7 +110,6 @@ namespace Wox.Test
                 Debug.WriteLine("");
 
                 Assert.IsFalse(filteredResult.Any(x => x.Score < precisionScore));
-                Assert.IsFalse(filteredResult.Any(x => x.Score == 0));
             }
         }
     }
