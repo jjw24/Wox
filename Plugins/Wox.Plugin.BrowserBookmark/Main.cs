@@ -5,12 +5,14 @@ using Wox.Plugin.SharedCommands;
 
 namespace Wox.Plugin.BrowserBookmark
 {
-    public class Main : IPlugin
+    public class Main : IPlugin, IPluginI18n
     {
-        private PluginInitContext context;
+        private PluginInitContext context { get; set; }
 
         // TODO: periodically refresh the Cache?
-        private List<Bookmark> cachedBookmarks = new List<Bookmark>(); 
+        private List<Bookmark> cachedBookmarks = new List<Bookmark>();
+
+
 
         public void Init(PluginInitContext context)
         {
@@ -48,7 +50,7 @@ namespace Wox.Plugin.BrowserBookmark
             return returnList.Select(c => new Result()
             {
                 Title = c.Name,
-                SubTitle = "Bookmark: " + c.Url,
+                SubTitle = context.API.GetTranslation("wox_plugin_browserbookmark_bookmark") + ": " + c.Url,
                 IcoPath = @"Images\bookmark.png",
                 Score = 5,
                 Action = (e) =>
@@ -67,6 +69,16 @@ namespace Wox.Plugin.BrowserBookmark
             if (StringMatcher.FuzzySearch(queryString, bookmark.Url, new MatchOption()).IsSearchPrecisionScoreMet()) return true;
 
             return false;
+        }
+
+        public string GetTranslatedPluginTitle()
+        {
+            return context.API.GetTranslation("wox_plugin_browserbookmark_plugin_name");
+        }
+
+        public string GetTranslatedPluginDescription()
+        {
+            return context.API.GetTranslation("wox_plugin_browserbookmark_plugin_description");
         }
     }
 }
