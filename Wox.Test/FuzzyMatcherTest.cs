@@ -187,5 +187,37 @@ namespace Wox.Test
             var matchPrecisionResult = matchResult.IsSearchPrecisionScoreMet();
             Assert.IsTrue(matchPrecisionResult == expectedPrecisionResult);
         }
+
+        [TestCase("exce", "OverLeaf-Latex: An online LaTeX editor", (int)StringMatcher.SearchPrecisionScore.Regular, false)]
+        [TestCase("term", "Windows Terminal (Preview)", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
+        [TestCase("sql s managa", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, false)]
+        [TestCase("sql' s manag", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, false)]
+        [TestCase("sql s manag", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
+        [TestCase("chr", "Change settings for text-to-speech and for speech recognition (if installed).", (int)StringMatcher.SearchPrecisionScore.Regular, false)]
+        [TestCase("sql", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
+        [TestCase("sql manag", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
+        [TestCase("test", "This is a test", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
+        [TestCase("chr", "Shutdown", (int)StringMatcher.SearchPrecisionScore.Regular, false)]
+        [TestCase("mic", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
+        public void WhenGivenQueryShouldReturnResultsContainingAllQuerySubstrings(
+            string queryString,
+            string compareString,
+            int expectedPrecisionScore,
+            bool expectedPrecisionResult)
+        {
+            var expectedPrecisionString = (StringMatcher.SearchPrecisionScore)expectedPrecisionScore;
+            StringMatcher.UserSettingSearchPrecision = expectedPrecisionString.ToString();
+            var matchResult = StringMatcher.FuzzySearch(queryString, compareString);
+
+            Debug.WriteLine("");
+            Debug.WriteLine("###############################################");
+            Debug.WriteLine($"QueryString: {queryString}     CompareString: {compareString}");
+            Debug.WriteLine($"RAW SCORE: {matchResult.RawScore.ToString()}, PrecisionLevelSetAt: {expectedPrecisionString} ({expectedPrecisionScore})");
+            Debug.WriteLine("###############################################");
+            Debug.WriteLine("");
+
+            var matchPrecisionResult = matchResult.IsSearchPrecisionScoreMet();
+            Assert.IsTrue(matchPrecisionResult == expectedPrecisionResult);
+        }
     }
 }
