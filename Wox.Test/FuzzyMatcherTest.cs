@@ -193,12 +193,12 @@ namespace Wox.Test
         [TestCase("sql s managa", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, false)]
         [TestCase("sql' s manag", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, false)]
         [TestCase("sql s manag", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
-        [TestCase("chr", "Change settings for text-to-speech and for speech recognition (if installed).", (int)StringMatcher.SearchPrecisionScore.Regular, false)]
-        [TestCase("sql", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
         [TestCase("sql manag", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
-        [TestCase("test", "This is a test", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
-        [TestCase("chr", "Shutdown", (int)StringMatcher.SearchPrecisionScore.Regular, false)]
+        [TestCase("sql", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
         [TestCase("mic", "Microsoft SQL Server Management Studio", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
+        [TestCase("chr", "Shutdown", (int)StringMatcher.SearchPrecisionScore.Regular, false)]
+        [TestCase("chr", "Change settings for text-to-speech and for speech recognition (if installed).", (int)StringMatcher.SearchPrecisionScore.Regular, false)]
+        [TestCase("test", "This is a test", (int)StringMatcher.SearchPrecisionScore.Regular, true)]
         public void WhenGivenQueryShouldReturnResultsContainingAllQuerySubstrings(
             string queryString,
             string compareString,
