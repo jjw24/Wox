@@ -86,10 +86,14 @@ namespace Wox.Infrastructure
                 }
             }
 
-            // return rendered string if we have a match for every char
-            if (patternIdx == pattern.Length)
+            var substringCharCount = AllQuerySubstringsWithoutWhitespacesMatched(compareString, pattern)
+                                        ? string.Concat(pattern.Where(c => !char.IsWhiteSpace(c))).Count()
+                                        : 0;
+
+            // return rendered string if we have a match for every char or all substring without whitespaces matched
+            if (patternIdx == pattern.Length || substringCharCount > 0)
             {
-                var score = CalculateSearchScore(query, stringToCompare, firstMatchIndex, lastMatchIndex - firstMatchIndex);
+                var score = CalculateSearchScore(query, stringToCompare, firstMatchIndex, lastMatchIndex - firstMatchIndex, substringCharCount);
                 var pinyinScore = ScoreForPinyin(stringToCompare, query);
 
                 var result = new MatchResult
@@ -105,7 +109,14 @@ namespace Wox.Infrastructure
             return new MatchResult { Success = false };
         }
 
-        private static int CalculateSearchScore(string query, string stringToCompare, int firstIndex, int matchLen)
+        private static bool AllQuerySubstringsWithoutWhitespacesMatched(string compareString, string queryString)
+        {
+            var substrings = queryString.Split();
+
+            return substrings.All(x => compareString.Contains(x));
+        }
+
+        private static int CalculateSearchScore(string query, string stringToCompare, int firstIndex, int matchLen, int matchedSubstringCharCount)
         {
             // A match found near the beginning of a string is scored more than a match found near the end
             // A match is scored more if the characters in the patterns are closer to each other, 
@@ -121,6 +132,9 @@ namespace Wox.Infrastructure
             {
                 score += 10;
             }
+
+            // One matching substring character is given a score of 10, eg. substring "sql" is 3 X 10, "sql manag" is 8 X 10
+            score += matchedSubstringCharCount * 10;
 
             return score;
         }
