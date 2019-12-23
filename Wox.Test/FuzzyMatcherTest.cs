@@ -145,7 +145,7 @@ namespace Wox.Test
             Debug.WriteLine("SEARCHTERM: " + searchTerm);
             foreach (var item in orderedResults)
             {
-                Debug.WriteLine("SCORE: " + item.Score.ToString() + ", FoundString: " + item.Title);
+                Debug.WriteLine("RAW SCORE: " + item.Score.ToString() + ", FoundString: " + item.Title);
             }
             Debug.WriteLine("###############################################");
             Debug.WriteLine("");
@@ -173,18 +173,18 @@ namespace Wox.Test
             int expectedPrecisionScore, 
             bool expectedPrecisionResult)
         {
-            var expectedPrecisionString = (StringMatcher.SearchPrecisionScore)expectedPrecisionScore;            
+            var expectedPrecisionString = (StringMatcher.SearchPrecisionScore)expectedPrecisionScore;
             StringMatcher.UserSettingSearchPrecision = expectedPrecisionString.ToString();
             var matchResult = StringMatcher.FuzzySearch(queryString, compareString);
 
             Debug.WriteLine("");
             Debug.WriteLine("###############################################");
-            Debug.WriteLine($"SearchTerm: {queryString} PrecisionLevelSetAt: {expectedPrecisionString} ({expectedPrecisionScore})");
-            Debug.WriteLine($"SCORE: {matchResult.Score.ToString()}, ComparedString: {compareString}");
+            Debug.WriteLine($"SearchTerm: {queryString}     ComparedString: {compareString}");
+            Debug.WriteLine($"RAW SCORE: {matchResult.RawScore.ToString()}, PrecisionLevelSetAt: {expectedPrecisionString} ({expectedPrecisionScore})");
             Debug.WriteLine("###############################################");
             Debug.WriteLine("");
 
-            var matchPrecisionResult = matchResult.IsSearchPrecisionScoreMet();            
+            var matchPrecisionResult = matchResult.IsSearchPrecisionScoreMet();
             Assert.IsTrue(matchPrecisionResult == expectedPrecisionResult);
         }
     }
