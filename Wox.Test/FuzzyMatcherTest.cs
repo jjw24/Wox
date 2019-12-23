@@ -179,7 +179,7 @@ namespace Wox.Test
 
             Debug.WriteLine("");
             Debug.WriteLine("###############################################");
-            Debug.WriteLine($"SearchTerm: {queryString}     ComparedString: {compareString}");
+            Debug.WriteLine($"QueryString: {queryString}     CompareString: {compareString}");
             Debug.WriteLine($"RAW SCORE: {matchResult.RawScore.ToString()}, PrecisionLevelSetAt: {expectedPrecisionString} ({expectedPrecisionScore})");
             Debug.WriteLine("###############################################");
             Debug.WriteLine("");
