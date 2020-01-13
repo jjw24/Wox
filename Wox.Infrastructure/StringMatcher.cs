@@ -140,12 +140,17 @@ namespace Wox.Infrastructure
             {
                 var score = CalculateSearchScore(query, stringToCompare, firstMatchIndex, lastMatchIndex - firstMatchIndex, allSubstringsContainedInCompareString);
                 var pinyinScore = ScoreForPinyin(stringToCompare, query);
+                if (pinyinScore > score)
+                {
+                    score = pinyinScore;
+                    indexList = null;
+                }
 
                 var result = new MatchResult
                 {
                     Success = true,
-                    MatchData = indexList, // TODO: pinyin is taking the wrong match data
-                    RawScore = Math.Max(score, pinyinScore) 
+                    MatchData = indexList, 
+                    RawScore = score,
                 };
 
                 return result;
