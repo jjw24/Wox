@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,7 +76,7 @@ namespace Wox.Infrastructure
         /// e.g. 音乐 will return yinyue and yinle
         /// <param name="characters"> should be word or sentence, instead of single character. e.g. 微软 </param>
         /// </summmary>
-        public static string[][] PinyinComination(string characters)
+        public static string[][] PinyinCombination(string characters)
         {
             if (!_settings.ShouldUsePinyin || string.IsNullOrEmpty(characters))
             {
