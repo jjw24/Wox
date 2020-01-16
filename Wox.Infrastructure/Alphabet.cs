@@ -1,7 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using hyjiacan.util.p4n;
 using hyjiacan.util.p4n.format;
 using Wox.Infrastructure.Logger;
@@ -36,6 +37,37 @@ namespace Wox.Infrastructure
                 PinyinHelper.toHanyuPinyinStringArray('T', Format);
             });
             Log.Info($"|Wox.Infrastructure.Alphabet.Initialize|Number of preload pinyin combination<{PinyinCache.Count}>");
+        }
+
+        public static Func<string, string> GetLanguageConverter()
+        {
+            if (_settings.ShouldUsePinyin)
+                return ConvertChineseCharactersToPinyin;
+
+            return null;
+        }
+
+        public static string ConvertChineseCharactersToPinyin(string source)
+        {
+            if (!_settings.ShouldUsePinyin)
+                return source;
+
+            if (string.IsNullOrEmpty(source))
+                return source;
+
+            if (!Alphabet.ContainsChinese(source))
+                return source;
+                
+            var combination = Alphabet.PinyinCombination(source);
+            
+            var pinyinArray=combination.Select(x => string.Join("", x));
+            var acronymArray = combination.Select(Alphabet.Acronym).Distinct();
+
+            var all = acronymArray.Concat(pinyinArray);
+            var joinedSingleStringCombination = new StringBuilder(" ");
+            all.ToList().ForEach(x => joinedSingleStringCombination.Append(x));
+
+            return joinedSingleStringCombination.ToString();
         }
 
         public static void Save()
