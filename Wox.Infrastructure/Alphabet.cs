@@ -55,16 +55,16 @@ namespace Wox.Infrastructure
             if (string.IsNullOrEmpty(source))
                 return source;
 
-            if (!Alphabet.ContainsChinese(source))
+            if (!ContainsChinese(source))
                 return source;
                 
-            var combination = Alphabet.PinyinCombination(source);
+            var combination = PinyinCombination(source);
             
             var pinyinArray=combination.Select(x => string.Join("", x));
-            var acronymArray = combination.Select(Alphabet.Acronym).Distinct();
+            var acronymArray = combination.Select(Acronym).Distinct();
 
+            var joinedSingleStringCombination = new StringBuilder();
             var all = acronymArray.Concat(pinyinArray);
-            var joinedSingleStringCombination = new StringBuilder(" ");
             all.ToList().ForEach(x => joinedSingleStringCombination.Append(x));
 
             return joinedSingleStringCombination.ToString();
