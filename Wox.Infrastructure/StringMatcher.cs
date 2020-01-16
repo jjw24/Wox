@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Wox.Infrastructure.Logger;
-using Wox.Infrastructure.UserSettings;
 using static Wox.Infrastructure.StringMatcher;
 
 namespace Wox.Infrastructure
@@ -21,7 +18,7 @@ namespace Wox.Infrastructure
         {
             if (!string.IsNullOrEmpty(source) && !string.IsNullOrEmpty(target))
             {
-                return FuzzySearch(target, source, DefaultMatchOption).Score;
+                return FuzzySearch(target, source, DefaultMatchOption, Alphabet.GetLanguageConverter()).Score;
             }
             else
             {
@@ -32,12 +29,12 @@ namespace Wox.Infrastructure
         [Obsolete("This method is obsolete and should not be used. Please use the static function StringMatcher.FuzzySearch")]
         public static bool IsMatch(string source, string target)
         {
-            return FuzzySearch(target, source, DefaultMatchOption).Score > 0;
+            return FuzzySearch(target, source, DefaultMatchOption, Alphabet.GetLanguageConverter()).Score > 0;
         }
 
         public static MatchResult FuzzySearch(string query, string stringToCompare)
         {
-            return FuzzySearch(query, stringToCompare, DefaultMatchOption);
+            return FuzzySearch(query, stringToCompare, DefaultMatchOption, Alphabet.GetLanguageConverter());
         }
 
         /// <summary>
@@ -51,11 +48,20 @@ namespace Wox.Infrastructure
         /// 6. Move onto the next substring's characters until all substrings are checked.
         /// 7. Consider success and move onto scoring if every char or substring without whitespaces matched
         /// </summary>
-        public static MatchResult FuzzySearch(string query, string stringToCompare, MatchOption opt)
+        /// <params>
+        /// convertLanguageToSameChars is used to standardise language characters so character matching can be executed.
+        /// </params>
+        public static MatchResult FuzzySearch(string query, string stringToCompare, MatchOption opt, Func<string,string> convertLanguageToSameChars = null)
         {
             if (string.IsNullOrEmpty(stringToCompare) || string.IsNullOrEmpty(query)) return new MatchResult { Success = false };
             
             query = query.Trim();
+
+            if (convertLanguageToSameChars != null)
+            {
+                query = convertLanguageToSameChars(query);
+                stringToCompare = convertLanguageToSameChars(stringToCompare);
+            }
 
             var fullStringToCompareWithoutCase = opt.IgnoreCase ? stringToCompare.ToLower() : stringToCompare;
 
@@ -139,13 +145,12 @@ namespace Wox.Infrastructure
             if (allQuerySubstringsMatched)
             {
                 var score = CalculateSearchScore(query, stringToCompare, firstMatchIndex, lastMatchIndex - firstMatchIndex, allSubstringsContainedInCompareString);
-                var pinyinScore = ScoreForPinyin(stringToCompare, query);
 
                 var result = new MatchResult
                 {
                     Success = true,
                     MatchData = indexList,
-                    RawScore = Math.Max(score, pinyinScore)
+                    RawScore = score
                 };
 
                 return result;
@@ -223,38 +228,6 @@ namespace Wox.Infrastructure
             Regular = 50,
             Low = 20,
             None = 0
-        }
-
-        public static int ScoreForPinyin(string source, string target)
-        {
-            if (!ShouldUsePinyin)
-            {
-                return 0;
-            }
-
-            if (!string.IsNullOrEmpty(source) && !string.IsNullOrEmpty(target))
-            {
-                if (Alphabet.ContainsChinese(source))
-                {
-                    var combination = Alphabet.PinyinComination(source);
-                    var pinyinScore = combination
-                        .Select(pinyin => FuzzySearch(target, string.Join("", pinyin)).Score)
-                        .Max();
-                    var acronymScore = combination.Select(Alphabet.Acronym)
-                        .Select(pinyin => FuzzySearch(target, pinyin).Score)
-                        .Max();
-                    var score = Math.Max(pinyinScore, acronymScore);
-                    return score;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
         }
     }
 
