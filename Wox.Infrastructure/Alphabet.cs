@@ -50,6 +50,7 @@ namespace Wox.Infrastructure
         private static string[] EmptyStringArray = new string[0];
         private static string[][] Empty2DStringArray = new string[0][];
 
+        [Obsolete("Not accurate, eg 音乐 will not return yinyue but returns yinle ")]
         /// <summary>
         /// replace chinese character with pinyin, non chinese character won't be modified
         /// <param name="word"> should be word or sentence, instead of single character. e.g. 微软 </param>
