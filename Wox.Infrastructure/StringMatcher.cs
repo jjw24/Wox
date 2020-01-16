@@ -49,18 +49,18 @@ namespace Wox.Infrastructure
         /// 7. Consider success and move onto scoring if every char or substring without whitespaces matched
         /// </summary>
         /// <params>
-        /// convertLanguageToSameChars is used to standardise language characters so character matching can be executed.
+        /// translateLanguage is used to standardise language characters so character matching can be executed.
         /// </params>
-        public static MatchResult FuzzySearch(string query, string stringToCompare, MatchOption opt, Func<string,string> convertLanguageToSameChars = null)
+        public static MatchResult FuzzySearch(string query, string stringToCompare, MatchOption opt, Func<string,string> translateLanguage = null)
         {
             if (string.IsNullOrEmpty(stringToCompare) || string.IsNullOrEmpty(query)) return new MatchResult { Success = false };
             
             query = query.Trim();
 
-            if (convertLanguageToSameChars != null)
+            if (translateLanguage != null)
             {
-                query = convertLanguageToSameChars(query);
-                stringToCompare = convertLanguageToSameChars(stringToCompare);
+                query = translateLanguage(query);
+                stringToCompare = translateLanguage(stringToCompare);
             }
 
             var fullStringToCompareWithoutCase = opt.IgnoreCase ? stringToCompare.ToLower() : stringToCompare;
