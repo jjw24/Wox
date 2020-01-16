@@ -41,7 +41,7 @@ namespace Wox.Infrastructure
 
         public static Func<string, string> GetLanguageConverter()
         {
-            if (_settings.ShouldUsePinyin)
+            if (_settings?.ShouldUsePinyin != null && _settings.ShouldUsePinyin)
                 return ConvertChineseCharactersToPinyin;
 
             return null;
