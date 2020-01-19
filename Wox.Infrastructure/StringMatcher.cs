@@ -258,8 +258,6 @@ namespace Wox.Infrastructure
         /// </summary>
         private int _rawScore;
 
-        private SearchPrecisionScore _searchPrecision;
-
         public int RawScore
         {
             get { return _rawScore; }
@@ -275,15 +273,7 @@ namespace Wox.Infrastructure
         /// </summary>
         public List<int> MatchData { get; set; }
 
-        public SearchPrecisionScore SearchPrecision
-        {
-            get => _searchPrecision;
-            set
-            {
-                _searchPrecision = value;
-                Score = ApplySearchPrecisionFilter(_rawScore);
-            }
-        }
+        public SearchPrecisionScore SearchPrecision { get; set; }
 
         public bool IsSearchPrecisionScoreMet()
         {
