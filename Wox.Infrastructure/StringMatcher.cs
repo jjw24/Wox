@@ -254,7 +254,7 @@ namespace Wox.Infrastructure
 
         private SearchPrecisionScore _searchPrecision;
 
-        public int RawScore // TODO: remove RawScore if it is only here for testing, then just put SearchPrecisionScore.None to verify Raw score and than use percision in a few tests to verify it is working, it make no sense to be user visible
+        public int RawScore
         {
             get { return _rawScore; }
             set
