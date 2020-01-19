@@ -264,7 +264,7 @@ namespace Wox.Infrastructure
             set
             {
                 _rawScore = value;
-                Score = ApplySearchPrecisionFilter(_rawScore);
+                Score = ScoreAfterSearchPrecisionFilter(_rawScore);
             }
         }
 
@@ -285,7 +285,7 @@ namespace Wox.Infrastructure
             return score >= (int)SearchPrecision;
         }
 
-        private int ApplySearchPrecisionFilter(int score)
+        private int ScoreAfterSearchPrecisionFilter(int rawScore)
         {
             return IsSearchPrecisionScoreMet(score) ? score : 0;
         }
