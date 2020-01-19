@@ -249,7 +249,7 @@ namespace Wox.Infrastructure
         public bool Success { get; set; }
 
         /// <summary>
-        /// The final score of the match result with all search precision filters applied.
+        /// The final score of the match result with search precision filters applied.
         /// </summary>
         public int Score { get; private set; }
 
@@ -277,17 +277,17 @@ namespace Wox.Infrastructure
 
         public bool IsSearchPrecisionScoreMet()
         {
-            return IsSearchPrecisionScoreMet(Score);
+            return IsSearchPrecisionScoreMet(_rawScore);
         }
 
-        private bool IsSearchPrecisionScoreMet(int score)
+        private bool IsSearchPrecisionScoreMet(int rawScore)
         {
-            return score >= (int)SearchPrecision;
+            return rawScore >= (int)SearchPrecision;
         }
 
         private int ScoreAfterSearchPrecisionFilter(int rawScore)
         {
-            return IsSearchPrecisionScoreMet(score) ? score : 0;
+            return IsSearchPrecisionScoreMet(rawScore) ? rawScore : 0;
         }
     }
 
