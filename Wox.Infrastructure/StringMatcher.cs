@@ -238,12 +238,12 @@ namespace Wox.Infrastructure
             SearchPrecision = searchPrecision;
         }
 
-        public MatchResult(bool success, SearchPrecisionScore searchPrecision, List<int> matchData, int score)
+        public MatchResult(bool success, SearchPrecisionScore searchPrecision, List<int> matchData, int rawScore)
         {
             Success = success;
             SearchPrecision = searchPrecision;
             MatchData = matchData;
-            Score = score;
+            RawScore = rawScore;
         }
 
         public bool Success { get; set; }
