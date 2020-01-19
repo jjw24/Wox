@@ -5,26 +5,32 @@ using System.Linq;
 using System.Text;
 using hyjiacan.util.p4n;
 using hyjiacan.util.p4n.format;
+using JetBrains.Annotations;
 using Wox.Infrastructure.Logger;
 using Wox.Infrastructure.Storage;
 using Wox.Infrastructure.UserSettings;
 
 namespace Wox.Infrastructure
 {
-    public static class Alphabet
+    public interface IAlphabet
     {
-        private static readonly HanyuPinyinOutputFormat Format = new HanyuPinyinOutputFormat();
-        private static ConcurrentDictionary<string, string[][]> PinyinCache;
-        private static BinaryStorage<ConcurrentDictionary<string, string[][]>> _pinyinStorage;
-        private static Settings _settings;
+        string Translate(string stringToTranslate);
+    }
+
+    public class Alphabet : IAlphabet
+    {
+        private readonly HanyuPinyinOutputFormat Format = new HanyuPinyinOutputFormat();
+        private ConcurrentDictionary<string, string[][]> PinyinCache;
+        private BinaryStorage<ConcurrentDictionary<string, string[][]>> _pinyinStorage;
+        private Settings _settings;
          
-        public static void Initialize(Settings settings)
+        public void Initialize([NotNull] Settings settings)
         {
-            _settings = settings;
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             InitializePinyinHelpers();
         }
 
-        private static void InitializePinyinHelpers()
+        private void InitializePinyinHelpers()
         {
             Format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
 
@@ -39,15 +45,12 @@ namespace Wox.Infrastructure
             Log.Info($"|Wox.Infrastructure.Alphabet.Initialize|Number of preload pinyin combination<{PinyinCache.Count}>");
         }
 
-        public static Func<string, string> GetLanguageConverter()
+        public string Translate(string str)
         {
-            if (_settings?.ShouldUsePinyin != null && _settings.ShouldUsePinyin)
-                return ConvertChineseCharactersToPinyin;
-
-            return null;
+            return ConvertChineseCharactersToPinyin(str);
         }
 
-        public static string ConvertChineseCharactersToPinyin(string source)
+        public string ConvertChineseCharactersToPinyin(string source)
         {
             if (!_settings.ShouldUsePinyin)
                 return source;
@@ -70,7 +73,7 @@ namespace Wox.Infrastructure
             return joinedSingleStringCombination.ToString();
         }
 
-        public static void Save()
+        public void Save()
         {
             if (!_settings.ShouldUsePinyin)
             {
@@ -87,7 +90,7 @@ namespace Wox.Infrastructure
         /// replace chinese character with pinyin, non chinese character won't be modified
         /// <param name="word"> should be word or sentence, instead of single character. e.g. 微软 </param>
         /// </summary>
-        public static string[] Pinyin(string word)
+        public string[] Pinyin(string word)
         {
             if (!_settings.ShouldUsePinyin)
             {
@@ -109,7 +112,7 @@ namespace Wox.Infrastructure
         /// e.g. 音乐 will return yinyue and yinle
         /// <param name="characters"> should be word or sentence, instead of single character. e.g. 微软 </param>
         /// </summmary>
-        public static string[][] PinyinCombination(string characters)
+        public string[][] PinyinCombination(string characters)
         {
             if (!_settings.ShouldUsePinyin || string.IsNullOrEmpty(characters))
             {
@@ -144,13 +147,13 @@ namespace Wox.Infrastructure
             }
         }
 
-        public static string Acronym(string[] pinyin)
+        public string Acronym(string[] pinyin)
         {
             var acronym = string.Join("", pinyin.Select(p => p[0]));
             return acronym;
         }
 
-        public static bool ContainsChinese(string word)
+        public bool ContainsChinese(string word)
         {
             if (!_settings.ShouldUsePinyin)
             {
@@ -168,7 +171,7 @@ namespace Wox.Infrastructure
             return chinese;
         }
 
-        private static string[] Combination(string[] array1, string[] array2)
+        private string[] Combination(string[] array1, string[] array2)
         {
             if (!_settings.ShouldUsePinyin)
             {
