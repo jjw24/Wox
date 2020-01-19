@@ -1,40 +1,46 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using static Wox.Infrastructure.StringMatcher;
 
 namespace Wox.Infrastructure
 {
-    public static class StringMatcher
+    public class StringMatcher
     {
-        public static MatchOption DefaultMatchOption = new MatchOption();
+        private readonly MatchOption _defaultMatchOption = new MatchOption();
 
-        public static SearchPrecisionScore UserSettingSearchPrecision { get; set; }
+        public SearchPrecisionScore UserSettingSearchPrecision { get; set; }
 
-        public static bool ShouldUsePinyin { get; set; }
+        private readonly IAlphabet _alphabet;
+
+        public StringMatcher(IAlphabet alphabet = null)
+        {
+            _alphabet = alphabet;
+        }
+
+        public static StringMatcher Instance { get; internal set; }
 
         [Obsolete("This method is obsolete and should not be used. Please use the static function StringMatcher.FuzzySearch")]
         public static int Score(string source, string target)
         {
-            if (!string.IsNullOrEmpty(source) && !string.IsNullOrEmpty(target))
-            {
-                return FuzzySearch(target, source, DefaultMatchOption, Alphabet.GetLanguageConverter()).Score;
-            }
-            else
-            {
-                return 0;
-            }
+            return FuzzySearch(target, source).Score;
         }
 
         [Obsolete("This method is obsolete and should not be used. Please use the static function StringMatcher.FuzzySearch")]
         public static bool IsMatch(string source, string target)
         {
-            return FuzzySearch(target, source, DefaultMatchOption, Alphabet.GetLanguageConverter()).Score > 0;
+            return Score(source, target) > 0;
         }
 
         public static MatchResult FuzzySearch(string query, string stringToCompare)
         {
-            return FuzzySearch(query, stringToCompare, DefaultMatchOption, Alphabet.GetLanguageConverter());
+            return Instance.FuzzyMatch(query, stringToCompare);
+        }
+
+        public MatchResult FuzzyMatch(string query, string stringToCompare)
+        {
+            return FuzzyMatch(query, stringToCompare, _defaultMatchOption);
         }
 
         /// <summary>
@@ -51,16 +57,16 @@ namespace Wox.Infrastructure
         /// <params>
         /// translateLanguage is used to standardise language characters so character matching can be executed.
         /// </params>
-        public static MatchResult FuzzySearch(string query, string stringToCompare, MatchOption opt, Func<string,string> translateLanguage = null)
+        public MatchResult FuzzyMatch(string query, string stringToCompare, MatchOption opt)
         {
             if (string.IsNullOrEmpty(stringToCompare) || string.IsNullOrEmpty(query)) return new MatchResult { Success = false };
             
             query = query.Trim();
 
-            if (translateLanguage != null)
+            if (_alphabet != null)
             {
-                query = translateLanguage(query);
-                stringToCompare = translateLanguage(stringToCompare);
+                query = _alphabet.Translate(query);
+                stringToCompare = _alphabet.Translate(stringToCompare);
             }
 
             var fullStringToCompareWithoutCase = opt.IgnoreCase ? stringToCompare.ToLower() : stringToCompare;
@@ -150,7 +156,8 @@ namespace Wox.Infrastructure
                 {
                     Success = true,
                     MatchData = indexList,
-                    RawScore = score
+                    RawScore = score,
+                    SearchPrecision = UserSettingSearchPrecision
                 };
 
                 return result;
@@ -245,7 +252,9 @@ namespace Wox.Infrastructure
         /// </summary>
         private int _rawScore;
 
-        public int RawScore
+        private SearchPrecisionScore _searchPrecision;
+
+        public int RawScore // TODO: remove RawScore if it is only here for testing, then just put SearchPrecisionScore.None to verify Raw score and than use percision in a few tests to verify it is working, it make no sense to be user visible
         {
             get { return _rawScore; }
             set
@@ -260,6 +269,16 @@ namespace Wox.Infrastructure
         /// </summary>
         public List<int> MatchData { get; set; }
 
+        public SearchPrecisionScore SearchPrecision
+        {
+            get => _searchPrecision;
+            set
+            {
+                _searchPrecision = value;
+                Score = ApplySearchPrecisionFilter(_rawScore);
+            }
+        }
+
         public bool IsSearchPrecisionScoreMet()
         {
             return IsSearchPrecisionScoreMet(Score);
@@ -267,7 +286,7 @@ namespace Wox.Infrastructure
 
         private bool IsSearchPrecisionScoreMet(int score)
         {
-            return score >= (int)UserSettingSearchPrecision;
+            return score >= (int)SearchPrecision;
         }
 
         private int ApplySearchPrecisionFilter(int score)
