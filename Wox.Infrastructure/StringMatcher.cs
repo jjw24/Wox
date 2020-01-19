@@ -59,7 +59,7 @@ namespace Wox.Infrastructure
         /// </params>
         public MatchResult FuzzyMatch(string query, string stringToCompare, MatchOption opt)
         {
-            if (string.IsNullOrEmpty(stringToCompare) || string.IsNullOrEmpty(query)) return new MatchResult { Success = false };
+            if (string.IsNullOrEmpty(stringToCompare) || string.IsNullOrEmpty(query)) return new MatchResult (false, UserSettingSearchPrecision);
             
             query = query.Trim();
 
@@ -152,18 +152,10 @@ namespace Wox.Infrastructure
             {
                 var score = CalculateSearchScore(query, stringToCompare, firstMatchIndex, lastMatchIndex - firstMatchIndex, allSubstringsContainedInCompareString);
 
-                var result = new MatchResult
-                {
-                    Success = true,
-                    MatchData = indexList,
-                    RawScore = score,
-                    SearchPrecision = UserSettingSearchPrecision
-                };
-
-                return result;
+                return new MatchResult(true, UserSettingSearchPrecision, indexList, score);
             }
 
-            return new MatchResult { Success = false };
+            return new MatchResult (false, UserSettingSearchPrecision);
         }
 
         private static bool AllPreviousCharsMatched(int startIndexToVerify, int currentQuerySubstringCharacterIndex, 
@@ -240,6 +232,20 @@ namespace Wox.Infrastructure
 
     public class MatchResult
     {
+        public MatchResult(bool success, SearchPrecisionScore searchPrecision)
+        {
+            Success = success;
+            SearchPrecision = searchPrecision;
+        }
+
+        public MatchResult(bool success, SearchPrecisionScore searchPrecision, List<int> matchData, int score)
+        {
+            Success = success;
+            SearchPrecision = searchPrecision;
+            MatchData = matchData;
+            Score = score;
+        }
+
         public bool Success { get; set; }
 
         /// <summary>
