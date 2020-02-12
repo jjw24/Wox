@@ -240,6 +240,7 @@ namespace Wox.Plugin.Folder
             var result = new Result
             {
                 Title = Path.GetFileName(filePath),
+                SubTitle = filePath,
                 IcoPath = filePath,
                 TitleHighlightData = StringMatcher.FuzzySearch(query.Search, Path.GetFileName(filePath)).MatchData,
                 Action = c =>
