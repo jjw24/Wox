@@ -14,7 +14,8 @@ namespace Wox.Infrastructure
         public static readonly string ProgramDirectory = Directory.GetParent(Assembly.Location.NonNull()).ToString();
         public static readonly string ExecutablePath = Path.Combine(ProgramDirectory, Wox + ".exe");
 
-        public static string PortableDataPath = Path.Combine(ProgramDirectory, "UserData");
+        public const string PortableFolderName = "UserData";
+        public static string PortableDataPath = Path.Combine(ProgramDirectory, PortableFolderName);
         public static string DetermineDataDirectory()
         {
             if (Directory.Exists(PortableDataPath))

@@ -10,6 +10,7 @@ using JetBrains.Annotations;
 using Squirrel;
 using Newtonsoft.Json;
 using Wox.Core.Resource;
+using Wox.Plugin.SharedCommands;
 using Wox.Infrastructure;
 using Wox.Infrastructure.Http;
 using Wox.Infrastructure.Logger;
@@ -20,6 +21,7 @@ namespace Wox.Core
     public class Updater
     {
         public string GitHubRepository { get; }
+        private bool IsPortableMode => Directory.Exists(Constant.PortableDataPath);
 
         public Updater(string gitHubRepository)
         {
@@ -57,35 +59,42 @@ namespace Wox.Core
             var currentVersion = Version.Parse(Constant.Version);
 
             Log.Info($"|Updater.UpdateApp|Future Release <{u.FutureReleaseEntry.Formatted()}>");
-            if (newReleaseVersion > currentVersion)
+
+            if (newReleaseVersion <= currentVersion)
             {
-                try
-                {
-                    await m.DownloadReleases(u.ReleasesToApply);
-                }
-                catch (Exception e) when (e is HttpRequestException || e is WebException || e is SocketException)
-                {
-                    Log.Exception($"|Updater.UpdateApp|Check your connection and proxy settings to github-cloud.s3.amazonaws.com.", e);
-                    m.Dispose();
-                    return;
-                }
-
-                await m.ApplyReleases(u);
-
-                // Not needed when in portable mode
-                if(!Directory.Exists(Constant.PortableDataPath))
-                    await m.CreateUninstallerRegistryEntry();
-
-                var newVersionTips = NewVersinoTips(newReleaseVersion.ToString());
-                
-                MessageBox.Show(newVersionTips);
-                Log.Info($"|Updater.UpdateApp|Update success:{newVersionTips}");
-            }
-            else
-            {
-                if(!silentIfLatestVersion)
+                if (!silentIfLatestVersion)
                     MessageBox.Show("You already have the latest Wox version");
+                m.Dispose();
+                return;
             }
+            
+            try
+            {
+                await m.DownloadReleases(u.ReleasesToApply);
+            }
+            catch (Exception e) when (e is HttpRequestException || e is WebException || e is SocketException)
+            {
+                Log.Exception($"|Updater.UpdateApp|Check your connection and proxy settings to github-cloud.s3.amazonaws.com.", e);
+                m.Dispose();
+                return;
+            }
+            
+            await m.ApplyReleases(u);
+            
+            // Not needed when in portable mode
+            if(!IsPortableMode)
+                await m.CreateUninstallerRegistryEntry();
+            
+            if (IsPortableMode)
+            {
+                var targetDestination = m.RootAppDirectory + $"\\app-{newReleaseVersion.ToString()}\\{Constant.PortableFolderName}";
+                FilesFolders.Copy(Constant.PortableDataPath, targetDestination);
+            }
+            
+            var newVersionTips = NewVersinoTips(newReleaseVersion.ToString());
+            
+            MessageBox.Show(newVersionTips);
+            Log.Info($"|Updater.UpdateApp|Update success:{newVersionTips}");
 
             // always dispose UpdateManager
             m.Dispose();
