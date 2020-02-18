@@ -26,7 +26,7 @@ namespace Wox.Core
             GitHubRepository = gitHubRepository;
         }
 
-        public async Task UpdateApp()
+        public async Task UpdateApp(bool silentIfLatestVersion = true)
         {
             UpdateManager m;
             UpdateInfo u;
@@ -83,7 +83,8 @@ namespace Wox.Core
             }
             else
             {
-                MessageBox.Show("You already have the latest Wox version");
+                if(!silentIfLatestVersion)
+                    MessageBox.Show("You already have the latest Wox version");
             }
 
             // always dispose UpdateManager
