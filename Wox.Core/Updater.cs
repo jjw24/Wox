@@ -81,7 +81,11 @@ namespace Wox.Core
                 MessageBox.Show(newVersionTips);
                 Log.Info($"|Updater.UpdateApp|Update success:{newVersionTips}");
             }
-            
+            else
+            {
+                MessageBox.Show("You already have the latest Wox version");
+            }
+
             // always dispose UpdateManager
             m.Dispose();
         }
