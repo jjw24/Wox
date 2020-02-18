@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -13,6 +13,7 @@ using Wox.Core.Resource;
 using Wox.Infrastructure;
 using Wox.Infrastructure.Http;
 using Wox.Infrastructure.Logger;
+using System.IO;
 
 namespace Wox.Core
 {
@@ -52,10 +53,11 @@ namespace Wox.Core
                 return;
             }
 
-            var fr = u.FutureReleaseEntry;
-            var cr = u.CurrentlyInstalledVersion;
-            Log.Info($"|Updater.UpdateApp|Future Release <{fr.Formatted()}>");
-            if (fr.Version > cr.Version)
+            var newReleaseVersion = Version.Parse(u.FutureReleaseEntry.Version.ToString());
+            var currentVersion = Version.Parse(Constant.Version);
+
+            Log.Info($"|Updater.UpdateApp|Future Release <{u.FutureReleaseEntry.Formatted()}>");
+            if (newReleaseVersion > currentVersion)
             {
                 try
                 {
@@ -69,9 +71,12 @@ namespace Wox.Core
                 }
 
                 await m.ApplyReleases(u);
-                await m.CreateUninstallerRegistryEntry();
 
-                var newVersionTips = this.NewVersinoTips(fr.Version.ToString());
+                // Not needed when in portable mode
+                if(!Directory.Exists(Constant.PortableDataPath))
+                    await m.CreateUninstallerRegistryEntry();
+
+                var newVersionTips = NewVersinoTips(newReleaseVersion.ToString());
                 
                 MessageBox.Show(newVersionTips);
                 Log.Info($"|Updater.UpdateApp|Update success:{newVersionTips}");
