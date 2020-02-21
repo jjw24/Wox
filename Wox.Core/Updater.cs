@@ -21,7 +21,6 @@ namespace Wox.Core
     public class Updater
     {
         public string GitHubRepository { get; }
-        private bool IsPortableMode => Directory.Exists(Constant.PortableDataPath);
 
         public Updater(string gitHubRepository)
         {
@@ -80,17 +79,17 @@ namespace Wox.Core
             }
             
             await m.ApplyReleases(u);
-            
-            // Not needed when in portable mode
-            if(!IsPortableMode)
-                await m.CreateUninstallerRegistryEntry();
-            
-            if (IsPortableMode)
+
+            if (Constant.IsPortableMode)
             {
                 var targetDestination = m.RootAppDirectory + $"\\app-{newReleaseVersion.ToString()}\\{Constant.PortableFolderName}";
                 FilesFolders.Copy(Constant.PortableDataPath, targetDestination);
             }
-            
+            else
+            {
+                await m.CreateUninstallerRegistryEntry();
+            }
+
             var newVersionTips = NewVersinoTips(newReleaseVersion.ToString());
             
             MessageBox.Show(newVersionTips);
