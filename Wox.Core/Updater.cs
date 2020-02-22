@@ -29,12 +29,12 @@ namespace Wox.Core
 
         public async Task UpdateApp(bool silentIfLatestVersion = true)
         {
-            UpdateManager m;
-            UpdateInfo u;
+            UpdateManager updateManager;
+            UpdateInfo newUpdateInfo;
 
             try
             {
-                m = await GitHubUpdateManager(GitHubRepository);
+                updateManager = await GitHubUpdateManager(GitHubRepository);
             }
             catch (Exception e) when (e is HttpRequestException || e is WebException || e is SocketException)
             {
@@ -45,49 +45,49 @@ namespace Wox.Core
             try
             {
                 // UpdateApp CheckForUpdate will return value only if the app is squirrel installed
-                u = await m.CheckForUpdate().NonNull();
+                newUpdateInfo = await updateManager.CheckForUpdate().NonNull();
             }
             catch (Exception e) when (e is HttpRequestException || e is WebException || e is SocketException)
             {
                 Log.Exception($"|Updater.UpdateApp|Check your connection and proxy settings to api.github.com.", e);
-                m.Dispose();
+                updateManager.Dispose();
                 return;
             }
 
-            var newReleaseVersion = Version.Parse(u.FutureReleaseEntry.Version.ToString());
+            var newReleaseVersion = Version.Parse(newUpdateInfo.FutureReleaseEntry.Version.ToString());
             var currentVersion = Version.Parse(Constant.Version);
 
-            Log.Info($"|Updater.UpdateApp|Future Release <{u.FutureReleaseEntry.Formatted()}>");
+            Log.Info($"|Updater.UpdateApp|Future Release <{newUpdateInfo.FutureReleaseEntry.Formatted()}>");
 
             if (newReleaseVersion <= currentVersion)
             {
                 if (!silentIfLatestVersion)
                     MessageBox.Show("You already have the latest Wox version");
-                m.Dispose();
+                updateManager.Dispose();
                 return;
             }
             
             try
             {
-                await m.DownloadReleases(u.ReleasesToApply);
+                await updateManager.DownloadReleases(newUpdateInfo.ReleasesToApply);
             }
             catch (Exception e) when (e is HttpRequestException || e is WebException || e is SocketException)
             {
                 Log.Exception($"|Updater.UpdateApp|Check your connection and proxy settings to github-cloud.s3.amazonaws.com.", e);
-                m.Dispose();
+                updateManager.Dispose();
                 return;
             }
             
-            await m.ApplyReleases(u);
+            await updateManager.ApplyReleases(newUpdateInfo);
 
             if (Constant.IsPortableMode)
             {
-                var targetDestination = m.RootAppDirectory + $"\\app-{newReleaseVersion.ToString()}\\{Constant.PortableFolderName}";
+                var targetDestination = updateManager.RootAppDirectory + $"\\app-{newReleaseVersion.ToString()}\\{Constant.PortableFolderName}";
                 FilesFolders.Copy(Constant.PortableDataPath, targetDestination);
             }
             else
             {
-                await m.CreateUninstallerRegistryEntry();
+                await updateManager.CreateUninstallerRegistryEntry();
             }
 
             var newVersionTips = NewVersinoTips(newReleaseVersion.ToString());
@@ -96,7 +96,7 @@ namespace Wox.Core
             Log.Info($"|Updater.UpdateApp|Update success:{newVersionTips}");
 
             // always dispose UpdateManager
-            m.Dispose();
+            updateManager.Dispose();
         }
 
         [UsedImplicitly]
