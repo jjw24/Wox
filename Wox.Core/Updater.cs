@@ -84,6 +84,9 @@ namespace Wox.Core
             {
                 var targetDestination = updateManager.RootAppDirectory + $"\\app-{newReleaseVersion.ToString()}\\{Constant.PortableFolderName}";
                 FilesFolders.Copy(Constant.PortableDataPath, targetDestination);
+                if (!FilesFolders.VerifyBothFolderFilesEqual(Constant.PortableDataPath, targetDestination))
+                    MessageBox.Show(string.Format("Wox was not able to move your user profile data to the new update version. Please manually" +
+                        "move your profile data folder from {0} to {1}", Constant.PortableDataPath, targetDestination));
             }
             else
             {
