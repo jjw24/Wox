@@ -28,8 +28,8 @@ Features
 - Portable mode
 - Drastically improved search experience
 - Search all subfolders and files
-- Option to always run CMD or Powershell scripts as administrator
-- Run CMD or Powershell scripts as a different user
+- Option to always run CMD or Powershell as administrator
+- Run CMD, Powershell and programs as a different user
 - Manage what programs should be loaded
 - Highlighting of how results are matched during query search
 - Open web search result as a tab or a new window
