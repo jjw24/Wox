@@ -71,6 +71,11 @@ namespace Wox
             _settingsVM.UpdateApp();
         }
 
+        public void ShowMsg(string title, string subTitle = "", string iconPath = "")
+        {
+            this.ShowMsg(title, subTitle,iconPath,true);
+        }
+
         public void SaveAppAllSettings()
         {
             _mainVM.Save();
