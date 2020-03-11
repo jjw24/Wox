@@ -102,7 +102,7 @@ namespace Wox
             _mainVM.MainWindowVisibility = Visibility.Visible;
         }
 
-        public void ShowMsg(string title, string subTitle = "", string iconPath = "", bool useMainWindowAsOwner = true)
+        public void ShowMsg(string title, string subTitle, string iconPath, bool useMainWindowAsOwner)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
