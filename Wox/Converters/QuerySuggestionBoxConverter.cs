@@ -6,7 +6,7 @@ using Wox.ViewModel;
 
 namespace Wox.Converters
 {
-    public class QuerySugguestionBoxConverter : IMultiValueConverter
+    public class QuerySuggestionBoxConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
@@ -48,7 +48,7 @@ namespace Wox.Converters
             }
             catch (Exception e)
             {
-                Log.Exception(nameof(QuerySugguestionBoxConverter), "fail to convert text for suggestion box", e);
+                Log.Exception(nameof(QuerySuggestionBoxConverter), "fail to convert text for suggestion box", e);
                 return string.Empty;
             }
         }

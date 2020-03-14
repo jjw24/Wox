@@ -28,7 +28,7 @@
         Visibility="{Binding MainWindowVisibility, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
         d:DataContext="{d:DesignInstance vm:MainViewModel}">
     <Window.Resources>
-        <converters:QuerySugguestionBoxConverter x:Key="QuerySugguestionBoxConverter"/>
+        <converters:QuerySuggestionBoxConverter x:Key="QuerySuggestionBoxConverter"/>
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Key="Escape" Command="{Binding EscCommand}"></KeyBinding>
@@ -66,7 +66,7 @@
                          Foreground="LightGray"
                          IsEnabled="False">
                     <TextBox.Text>
-                        <MultiBinding Converter="{StaticResource QuerySugguestionBoxConverter}">
+                        <MultiBinding Converter="{StaticResource QuerySuggestionBoxConverter}">
                             <Binding ElementName="QueryTextBox" Path="Text"/>
                             <Binding ElementName="ResultListBox" Path="SelectedItem"/>
                         </MultiBinding>
