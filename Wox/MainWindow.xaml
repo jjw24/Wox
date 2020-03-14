@@ -4,7 +4,9 @@
         xmlns:wox="clr-namespace:Wox"
         xmlns:vm="clr-namespace:Wox.ViewModel"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:Wox.Converters"
+        mc:Ignorable="d"
         Title="Wox"
         Topmost="True"
         SizeToContent="Height"
@@ -25,6 +27,9 @@
         PreviewKeyDown="OnKeyDown"
         Visibility="{Binding MainWindowVisibility, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
         d:DataContext="{d:DesignInstance vm:MainViewModel}">
+    <Window.Resources>
+        <converters:QuerySugguestionBoxConverter x:Key="QuerySugguestionBoxConverter"/>
+    </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Key="Escape" Command="{Binding EscCommand}"></KeyBinding>
         <KeyBinding Key="F1" Command="{Binding StartHelpCommand}"></KeyBinding>
@@ -56,20 +61,25 @@
     <Border Style="{DynamicResource WindowBorderStyle}" MouseDown="OnMouseDown" >
         <StackPanel Orientation="Vertical">
             <Grid>
-                <TextBox Style="{DynamicResource QueryBoxStyle}"
-                         Text="{Binding QueryTextSuggestion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         x:Name="QueryTextSuggestionBox"
+                <TextBox x:Name="QueryTextSuggestionBox"
+                         Style="{DynamicResource QueryBoxStyle}"
                          Foreground="LightGray"
                          IsEnabled="False">
+                    <TextBox.Text>
+                        <MultiBinding Converter="{StaticResource QuerySugguestionBoxConverter}">
+                            <Binding ElementName="QueryTextBox" Path="Text"/>
+                            <Binding ElementName="ResultListBox" Path="SelectedItem"/>
+                        </MultiBinding>
+                    </TextBox.Text>
                 </TextBox>
-                <TextBox Style="{DynamicResource QueryBoxStyle}"
+                <TextBox x:Name="QueryTextBox"
+                    Style="{DynamicResource QueryBoxStyle}"
                      Text="{Binding QueryText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      PreviewDragOver="OnPreviewDragOver"
                      TextChanged="OnTextChanged"
                      AllowDrop="True"
                      Visibility="Visible"
-                     x:Name="QueryTextBox"
-                     Background="Transparent">
+                    Background="Transparent">
                     <TextBox.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="ApplicationCommands.Cut"/>
@@ -86,7 +96,7 @@
                   Y1="0" Y2="0" X2="100" Height="2" Width="752" StrokeThickness="1">
             </Line>
             <ContentControl>
-                <wox:ResultListBox DataContext="{Binding Results}" PreviewMouseDown="OnPreviewMouseButtonDown" />
+                <wox:ResultListBox x:Name="ResultListBox" DataContext="{Binding Results}" PreviewMouseDown="OnPreviewMouseButtonDown" />
             </ContentControl>
             <ContentControl>
                 <wox:ResultListBox DataContext="{Binding ContextMenu}" PreviewMouseDown="OnPreviewMouseButtonDown" />
