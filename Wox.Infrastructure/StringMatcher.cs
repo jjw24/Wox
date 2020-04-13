@@ -211,8 +211,11 @@ namespace Wox.Infrastructure
 
             if (allSubstringsContainedInCompareString)
             {
-                int count = query.Count(c => !char.IsWhiteSpace(c));
-                int factor = count < 4 ? 10 : 5;
+                var count = query.Count(c => !char.IsWhiteSpace(c));
+
+                //10 per char is too much for long query strings, this limitation is to avoid where long strings will override the other results too much
+                var factor = count < 5 ? 10 : 5;
+
                 score += factor * count;
             }
 
