@@ -65,7 +65,7 @@ namespace Wox.Core.Resource
 
         public bool ChangeTheme(string theme)
         {
-            const string defaultTheme = "Dark";
+            const string defaultTheme = "Darker";
 
             string path = GetThemePath(theme);
             try

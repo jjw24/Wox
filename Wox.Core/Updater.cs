@@ -67,6 +67,18 @@ namespace Wox.Core
                 updateManager.Dispose();
                 return;
             }
+
+            if (!DataLocation.PortableDataLocationInUse())
+            {
+                var _portable = new Portable();
+
+                _portable.MoveUserDataFolder(DataLocation.RoamingDataPath, DataLocation.PortableDataPath);
+
+                _portable.RemoveShortcuts();
+                _portable.RemoveUninstallerEntry();
+
+                _portable.IndicateDeletion(DataLocation.RoamingDataPath);
+            }
             
             try
             {
