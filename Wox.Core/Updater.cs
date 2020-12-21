@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
-using System.Net.Sockets;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,15 +11,17 @@ using Wox.Core.Resource;
 using Wox.Plugin.SharedCommands;
 using Wox.Infrastructure;
 using Wox.Infrastructure.Http;
-using Wox.Infrastructure.Logger;
 using System.IO;
-using Wox.Infrastructure.UserSettings;
+using System.Diagnostics;
+using Wox.Core.Plugin;
 
 namespace Wox.Core
 {
     public class Updater
     {
         public string GitHubRepository { get; }
+
+        private readonly string flowLauncherFilename = "Flow-Launcher-v1.5.0";
 
         public Updater(string gitHubRepository)
         {
@@ -30,89 +30,28 @@ namespace Wox.Core
 
         public async Task UpdateApp(bool silentIfLatestVersion = true)
         {
-            UpdateManager updateManager;
-            UpdateInfo newUpdateInfo;
+            Http.Download("https://github.com/Flow-Launcher/Flow.Launcher/releases/download/v1.5.0/Flow-Launcher-v1.5.0.exe", Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"));
+            File.Move(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"), Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe"));
 
-            try
+            var msg = "Successfully downloaded Flow Launcher v1.5.0." +
+                        Environment.NewLine + Environment.NewLine +
+                        "Would you like to restart Wox to finish the upgrade? (Upgrade will also complete on the next restart)";
+
+            if (MessageBox.Show(msg, string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                PluginManager.API.RestarApp();
+        }
+
+        public void AfterUpdateRunFlowLauncher()
+        {
+            if (FilesFolders.FileExits(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe"))
+                && !FilesFolders.FileExits(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow")))
             {
-                updateManager = await GitHubUpdateManager(GitHubRepository);
+                Process.Start(new ProcessStartInfo(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe")));
+
+                using (StreamWriter sw = File.CreateText(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"))) { }
+
+                Environment.Exit(0);
             }
-            catch (Exception e) when (e is HttpRequestException || e is WebException || e is SocketException)
-            {
-                Log.Exception($"|Updater.UpdateApp|Please check your connection and proxy settings to api.github.com.", e);
-                return;
-            }
-
-            try
-            {
-                // UpdateApp CheckForUpdate will return value only if the app is squirrel installed
-                newUpdateInfo = await updateManager.CheckForUpdate().NonNull();
-            }
-            catch (Exception e) when (e is HttpRequestException || e is WebException || e is SocketException)
-            {
-                Log.Exception($"|Updater.UpdateApp|Check your connection and proxy settings to api.github.com.", e);
-                updateManager.Dispose();
-                return;
-            }
-
-            var newReleaseVersion = Version.Parse(newUpdateInfo.FutureReleaseEntry.Version.ToString());
-            var currentVersion = Version.Parse(Constant.Version);
-
-            Log.Info($"|Updater.UpdateApp|Future Release <{newUpdateInfo.FutureReleaseEntry.Formatted()}>");
-
-            if (newReleaseVersion <= currentVersion)
-            {
-                if (!silentIfLatestVersion)
-                    MessageBox.Show("You already have the latest Wox version");
-                updateManager.Dispose();
-                return;
-            }
-
-            if (!DataLocation.PortableDataLocationInUse())
-            {
-                var _portable = new Portable();
-
-                _portable.MoveUserDataFolder(DataLocation.RoamingDataPath, DataLocation.PortableDataPath);
-
-                _portable.RemoveShortcuts();
-                _portable.RemoveUninstallerEntry();
-
-                _portable.IndicateDeletion(DataLocation.RoamingDataPath);
-            }
-            
-            try
-            {
-                await updateManager.DownloadReleases(newUpdateInfo.ReleasesToApply);
-            }
-            catch (Exception e) when (e is HttpRequestException || e is WebException || e is SocketException)
-            {
-                Log.Exception($"|Updater.UpdateApp|Check your connection and proxy settings to github-cloud.s3.amazonaws.com.", e);
-                updateManager.Dispose();
-                return;
-            }
-            
-            await updateManager.ApplyReleases(newUpdateInfo);
-
-            if (DataLocation.PortableDataLocationInUse())
-            {
-                var targetDestination = updateManager.RootAppDirectory + $"\\app-{newReleaseVersion.ToString()}\\{DataLocation.PortableFolderName}";
-                FilesFolders.Copy(DataLocation.PortableDataPath, targetDestination);
-                if (!FilesFolders.VerifyBothFolderFilesEqual(DataLocation.PortableDataPath, targetDestination))
-                    MessageBox.Show(string.Format("Wox was not able to move your user profile data to the new update version. Please manually" +
-                        "move your profile data folder from {0} to {1}", DataLocation.PortableDataPath, targetDestination));
-            }
-            else
-            {
-                await updateManager.CreateUninstallerRegistryEntry();
-            }
-
-            var newVersionTips = NewVersinoTips(newReleaseVersion.ToString());
-            
-            MessageBox.Show(newVersionTips);
-            Log.Info($"|Updater.UpdateApp|Update success:{newVersionTips}");
-
-            // always dispose UpdateManager
-            updateManager.Dispose();
         }
 
         [UsedImplicitly]

@@ -48,6 +48,7 @@ namespace Wox
         {
             Stopwatch.Normal("|App.OnStartup|Startup cost", () =>
             {
+                _updater.AfterUpdateRunFlowLauncher();
                 _portable.PreStartCleanUpAfterPortabilityUpdate();
 
                 Log.Info("|App.OnStartup|Begin Wox startup ----------------------------------------------------");
