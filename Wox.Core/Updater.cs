@@ -14,6 +14,7 @@ using Wox.Infrastructure.Http;
 using System.IO;
 using System.Diagnostics;
 using Wox.Core.Plugin;
+using Wox.Infrastructure.UserSettings;
 
 namespace Wox.Core
 {
@@ -46,12 +47,20 @@ namespace Wox.Core
             if (FilesFolders.FileExits(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe"))
                 && !FilesFolders.FileExits(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow")))
             {
+                AfterUpdateCopyWoxSettings();
+
                 Process.Start(new ProcessStartInfo(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe")));
 
                 using (StreamWriter sw = File.CreateText(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"))) { }
 
                 Environment.Exit(0);
             }
+        }
+
+        private void AfterUpdateCopyWoxSettings()
+        {
+            if (!FilesFolders.LocationExists(DataLocation.RoamingDataPath))
+                FilesFolders.Copy(DataLocation.DataDirectory(), Path.Combine(Directory.GetParent(DataLocation.RoamingDataPath).FullName, "FlowLauncher"));
         }
 
         [UsedImplicitly]
