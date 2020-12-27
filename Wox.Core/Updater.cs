@@ -76,8 +76,42 @@ namespace Wox.Core
 
         private void AfterUpdateCopyWoxSettings()
         {
-            if (!FilesFolders.LocationExists(DataLocation.RoamingDataPath))
+            if (!FilesFolders.LocationExists(Path.Combine(Directory.GetParent(DataLocation.RoamingDataPath).FullName, "FlowLauncher")))
+            {
                 FilesFolders.Copy(DataLocation.DataDirectory(), Path.Combine(Directory.GetParent(DataLocation.RoamingDataPath).FullName, "FlowLauncher"));
+
+                RenameWoxSettings();
+            }
+        }
+
+        private void RenameWoxSettings()
+        {
+            var flowDataDirectory = Path.Combine(Directory.GetParent(DataLocation.RoamingDataPath).FullName, "FlowLauncher");
+            var flowPluginSettingDirectory = Path.Combine(flowDataDirectory, "Settings","Plugins");
+
+            Directory.Move(Path.Combine(flowPluginSettingDirectory, "Wox.Plugin.BrowserBookmark"), 
+                Path.Combine(flowPluginSettingDirectory, "Flow.Launcher.Plugin.BrowserBookmark"));
+
+            Directory.Move(Path.Combine(flowPluginSettingDirectory, "Wox.Plugin.Caculator"),
+                Path.Combine(flowPluginSettingDirectory, "Flow.Launcher.Plugin.Caculator"));
+
+            Directory.Move(Path.Combine(flowPluginSettingDirectory, "Wox.Plugin.Everything"),
+                Path.Combine(flowPluginSettingDirectory, "Flow.Launcher.Plugin.Everything"));
+
+            Directory.Move(Path.Combine(flowPluginSettingDirectory, "Wox.Plugin.Folder"),
+                Path.Combine(flowPluginSettingDirectory, "Flow.Launcher.Plugin.Explorer"));
+
+            Directory.Move(Path.Combine(flowPluginSettingDirectory, "Wox.Plugin.Program"),
+                Path.Combine(flowPluginSettingDirectory, "Flow.Launcher.Plugin.Program"));
+
+            Directory.Move(Path.Combine(flowPluginSettingDirectory, "Wox.Plugin.Shell"),
+                Path.Combine(flowPluginSettingDirectory, "Flow.Launcher.Plugin.Shell"));
+
+            Directory.Move(Path.Combine(flowPluginSettingDirectory, "Wox.Plugin.Url"),
+                Path.Combine(flowPluginSettingDirectory, "Flow.Launcher.Plugin.Url"));
+
+            Directory.Move(Path.Combine(flowPluginSettingDirectory, "Wox.Plugin.WebSearch"),
+                Path.Combine(flowPluginSettingDirectory, "Flow.Launcher.Plugin.WebSearch"));
         }
 
         [UsedImplicitly]
