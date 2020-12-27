@@ -31,6 +31,23 @@ namespace Wox.Core
 
         public async Task UpdateApp(bool silentIfLatestVersion = true)
         {
+            var upgradeMsg = "This update will upgrade Wox to Flow Launcher. " +
+                Environment.NewLine + Environment.NewLine +
+                "This Wox will no longer recieve updates or be maintained, " +
+                "however if you still like to continue using it, " +
+                "simply untick the auto update option to avoid this message from keep popping up. " +
+                Environment.NewLine + Environment.NewLine +
+                "Flow Launcher has a lot more improvements and is well maintained, visit flow-launcher.github.io for more details." +
+                Environment.NewLine + Environment.NewLine +
+                "The update will run in the background and take up to 5 minutes depending on your internet connection, you can still use the program in the meantime. " +
+                "When it is done your settings for Wox will be transferred across to Flow Launcher. " +
+                "Once you are familiar with Flow Launcher, simply uninstall Wox" +
+                Environment.NewLine + Environment.NewLine +
+                "Would you like to continue?";
+
+            if (MessageBox.Show(upgradeMsg, "Upgrade to Flow Launcher", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                return;
+
             Http.Download("https://github.com/Flow-Launcher/Flow.Launcher/releases/download/v1.5.0/Flow-Launcher-v1.5.0.exe", Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"));
             File.Move(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"), Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe"));
 
@@ -45,13 +62,13 @@ namespace Wox.Core
         public void AfterUpdateRunFlowLauncher()
         {
             if (FilesFolders.FileExits(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe"))
-                && !FilesFolders.FileExits(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow")))
+                && !FilesFolders.FileExits(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".installed")))
             {
                 AfterUpdateCopyWoxSettings();
 
                 Process.Start(new ProcessStartInfo(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe")));
 
-                using (StreamWriter sw = File.CreateText(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"))) { }
+                using (StreamWriter sw = File.CreateText(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".installed"))) { }
 
                 Environment.Exit(0);
             }

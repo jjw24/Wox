@@ -244,8 +244,6 @@ namespace Wox.Plugin.Sys
                     {
                         Application.Current.MainWindow.Hide();
                         context.API.CheckForNewUpdate();
-                        context.API.ShowMsg("Please wait...",
-                            "Checking for new update");
                         return true;
                     }
                 }
