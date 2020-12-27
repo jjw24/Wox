@@ -30,6 +30,7 @@ namespace Wox.Plugin.Folder
         {
             _storage = new PluginJsonStorage<Settings>();
             _settings = _storage.Load();
+            _settings.QuickFolderAccessLinks = _settings.FolderLinks;
         }
 
         public void Save()
