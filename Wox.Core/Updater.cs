@@ -33,7 +33,7 @@ namespace Wox.Core
         {
             var upgradeMsg = "This update will upgrade Wox to Flow Launcher. " +
                 Environment.NewLine + Environment.NewLine +
-                "This Wox will no longer recieve updates or be maintained, " +
+                "JJW24/Wox will no longer recieve updates or be maintained, " +
                 "however if you still like to continue using it, " +
                 "simply untick the auto update option to avoid this message from keep popping up. " +
                 Environment.NewLine + Environment.NewLine +
@@ -48,8 +48,12 @@ namespace Wox.Core
             if (MessageBox.Show(upgradeMsg, "Upgrade to Flow Launcher", MessageBoxButton.YesNo) == MessageBoxResult.No)
                 return;
 
-            Http.Download("https://github.com/Flow-Launcher/Flow.Launcher/releases/download/v1.5.0/Flow-Launcher-v1.5.0.exe", Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"));
-            File.Move(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"), Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe"));
+            if (!FilesFolders.FileExits(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe")))
+            {
+                Http.Download("https://github.com/Flow-Launcher/Flow.Launcher/releases/download/v1.5.0/Flow-Launcher-v1.5.0.exe", Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"));
+
+                File.Move(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"), Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe"));
+            }
 
             var msg = "Successfully downloaded Flow Launcher v1.5.0." +
                         Environment.NewLine + Environment.NewLine +

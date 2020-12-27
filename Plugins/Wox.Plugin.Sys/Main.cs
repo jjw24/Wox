@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Interop;
@@ -243,7 +244,12 @@ namespace Wox.Plugin.Sys
                     Action = c =>
                     {
                         Application.Current.MainWindow.Hide();
-                        context.API.CheckForNewUpdate();
+
+                        Task.Run(() =>
+                        {
+                            context.API.CheckForNewUpdate();
+                        });
+
                         return true;
                     }
                 }
