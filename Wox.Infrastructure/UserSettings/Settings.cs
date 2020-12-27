@@ -9,9 +9,21 @@ namespace Wox.Infrastructure.UserSettings
 {
     public class Settings : BaseModel
     {
-        public string Hotkey { get; set; } = "Alt + Space";
-        public string Language { get; set; } = "en";
-        public string Theme { get; set; } = "Darker";
+        private string language = "en";
+
+        public string Hotkey { get; set; } = $"{KeyConstant.Alt} + {KeyConstant.Space}";
+        public string OpenResultModifiers { get; set; } = KeyConstant.Alt;
+        public bool ShowOpenResultHotkey { get; set; } = true;
+        public string Language
+        {
+            get => language; set
+            {
+                language = value;
+                OnPropertyChanged();
+            }
+        }
+        public string Theme { get; set; } = Constant.DefaultTheme;
+        public bool UseDropShadowEffect { get; set; } = false;
         public string QueryBoxFont { get; set; } = FontFamily.GenericSansSerif.Name;
         public string QueryBoxFontStyle { get; set; }
         public string QueryBoxFontWeight { get; set; }
@@ -59,7 +71,7 @@ namespace Wox.Infrastructure.UserSettings
 
         public double WindowLeft { get; set; }
         public double WindowTop { get; set; }
-        public int MaxResultsToShow { get; set; } = 6;
+        public int MaxResultsToShow { get; set; } = 5;
         public int ActivateTimes { get; set; }
 
         // Order defaults to 0 or -1, so 1 will let this property appear last
@@ -67,16 +79,12 @@ namespace Wox.Infrastructure.UserSettings
         public PluginsSettings PluginSettings { get; set; } = new PluginsSettings();
         public ObservableCollection<CustomPluginHotkey> CustomPluginHotkeys { get; set; } = new ObservableCollection<CustomPluginHotkey>();
 
-        [Obsolete]
-        public double Opacity { get; set; } = 1;
-
-        [Obsolete]
-        public OpacityMode OpacityMode { get; set; } = OpacityMode.Normal;
-
         public bool DontPromptUpdateMsg { get; set; }
         public bool EnableUpdateLog { get; set; }
 
         public bool StartWoxOnSystemStartup { get; set; } = true;
+        public bool StartFlowLauncherOnSystemStartup { get; set; } = true;
+
         public bool HideOnStartup { get; set; }
         bool _hideNotifyIcon { get; set; }
         public bool HideNotifyIcon
@@ -105,12 +113,11 @@ namespace Wox.Infrastructure.UserSettings
         Empty,
         Preserved
     }
+}
 
-    [Obsolete]
-    public enum OpacityMode
-    {
-        Normal = 0,
-        LayeredWindow = 1,
-        DWM = 2
-    }
+public static class KeyConstant
+{
+    public const string Ctrl = nameof(Ctrl);
+    public const string Alt = nameof(Alt);
+    public const string Space = nameof(Space);
 }

@@ -25,5 +25,7 @@ namespace Wox.Infrastructure
 
         public static string PythonPath;
         public static string EverythingSDKPath;
+
+        public const string DefaultTheme = "Darker";
     }
 }

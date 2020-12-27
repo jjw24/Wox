@@ -92,6 +92,9 @@ namespace Wox
                 AutoUpdates();
 
                 _mainVM.MainWindowVisibility = _settings.HideOnStartup ? Visibility.Hidden : Visibility.Visible;
+
+                _settings.StartFlowLauncherOnSystemStartup = _settings.StartWoxOnSystemStartup;
+
                 Log.Info("|App.OnStartup|End Wox startup ----------------------------------------------------  ");
             });
         }
