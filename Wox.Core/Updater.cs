@@ -22,7 +22,7 @@ namespace Wox.Core
     {
         public string GitHubRepository { get; }
 
-        private readonly string flowLauncherFilename = "Flow-Launcher-v1.5.0";
+        private readonly string flowLauncherFilename = "Flow-Launcher-v1.6.0";
 
         public Updater(string gitHubRepository)
         {
@@ -50,12 +50,12 @@ namespace Wox.Core
 
             if (!FilesFolders.FileExits(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe")))
             {
-                Http.Download("https://github.com/Flow-Launcher/Flow.Launcher/releases/download/v1.5.0/Flow-Launcher-v1.5.0.exe", Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"));
+                Http.Download("https://github.com/Flow-Launcher/Flow.Launcher/releases/download/v1.6.0/Flow-Launcher-v1.6.0.exe", Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"));
 
                 File.Move(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".flow"), Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".exe"));
             }
 
-            var msg = "Successfully downloaded Flow Launcher v1.5.0." +
+            var msg = "Successfully downloaded Flow Launcher v1.6.0." +
                         Environment.NewLine + Environment.NewLine +
                         "Would you like to restart Wox to finish the upgrade? (Upgrade will also complete on the next restart)";
 
