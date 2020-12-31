@@ -1,3 +1,7 @@
+This repo is no longer maintained. For a better experience, please use [Flow Launcher](https://github.com/Flow-Launcher/Flow.Launcher/releases/latest)
+======================================================================================
+Note if you are using Wox currently, ensure you are on version JJW24-v1.53.24 and upgrade by checking for new update. Your settings will be transferred across to Flow Launcher. 
+
 WoX
 ===
 
