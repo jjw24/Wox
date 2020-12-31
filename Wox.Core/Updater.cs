@@ -76,6 +76,12 @@ namespace Wox.Core
 
                 Environment.Exit(0);
             }
+
+            if (FilesFolders.FileExits(Path.Combine(Constant.ApplicationDirectory, flowLauncherFilename + ".installed")))
+            {
+                MessageBox.Show("You have upgraded to Flow Launcher. Please run that instead.", "Upgraded to Flow Launcher");
+                Environment.Exit(0);
+            }
         }
 
         private void AfterUpdateCopyWoxSettings()
